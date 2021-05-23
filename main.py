@@ -5,14 +5,14 @@
 #Images licensed under Creative Commons Attribution 3.0. https://creativecommons.org/licenses/by/3.0/us/
 #gem.png <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 
-#for backrgound
+#for background
 #<a href='https://www.freepik.com/vectors/house'>House vector created by pikisuperstar - www.freepik.com</a>
 
 
 import random
 import pygame
 import math
-import time
+
 
 from pygame.locals import (
     K_UP,
@@ -32,6 +32,8 @@ icon_img = 'ufo.png'
 
 SCREEN_WIDTH = 990
 SCREEN_HEIGHT = 660
+FPS = 120 # frames per second setting
+fpsClock = pygame.time.Clock()
 
 gems = ['gem.png','gem_orange.png']
 
@@ -39,9 +41,9 @@ user_attempt = ''
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,image):
         super(Player,self).__init__()
-        self.surf = pygame.image.load('unicorn.png').convert()
+        self.surf = pygame.image.load(image).convert()
         self.surf.set_colorkey((255,255,255),pygame.RLEACCEL)
         self.rect = self.surf.get_rect()
         self.score = 0
@@ -49,13 +51,13 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:
-            self.rect.move_ip(0, -2)
+            self.rect.move_ip(0, -5)
         if pressed_keys[K_DOWN]:
-            self.rect.move_ip(0, 2)
+            self.rect.move_ip(0, 5)
         if pressed_keys[K_LEFT]:
-            self.rect.move_ip(-2, 0)
+            self.rect.move_ip(-5, 0)
         if pressed_keys[K_RIGHT]:
-            self.rect.move_ip(2, 0)
+            self.rect.move_ip(5, 0)
         # Keep player on the screen
         if self.rect.left < 0:
             self.rect.left = 0
@@ -74,10 +76,8 @@ class Gem():
         self.rect = self.surf.get_rect()
         self.randomize()
         self.collected = False
-        self.circle_radius = 30
-        self.circle_px = 6
-        self.circle_color = (50,50,50)
-        self.collision_point = ()
+        self.last_collision = ()
+        self.circle = Circle((self.rect.x,self.rect.y))
 
     def move(self):
         # Keep player on the screen
@@ -97,15 +97,36 @@ class Gem():
 
     def check_if_collected(self):
         if self.collected:
-            self.rect.y -= 2
-            self.circle_radius += 1
-#            self.circle_px -= 
+            self.rect.y -= 5
+            self.circle.draw_circle()
+        else:
+            self.circle.radius = 30
+            self.circle.px = 30
 
         if self.rect.y <= -50:#SCREEN_HEIGHT:
             self.collected = False
-            self.circle_radius = 30
-            self.circle_px = 6
             self.randomize()
+
+
+
+
+class Circle:
+    def __init__(self,position):
+        self.color = (255,255,255)
+        self.position = position
+        self.radius = 30
+        self.px = 30
+        self.start_time = pygame.time.get_ticks()
+
+    def draw_circle(self):
+        if self.radius <= SCREEN_WIDTH/2:
+            self.radius = self.radius + 2
+            if self.px <= 1:
+                self.px = 1
+            else:
+                self.px = self.px - 1
+            pygame.draw.circle(screen, self.color, self.position, self.radius, self.px)
+
 
 class Villain:
     def __init__(self,image):
@@ -118,14 +139,13 @@ class Villain:
 
     def move_around(self):
         self.rect.x = self.rect.x + self.x_change
-#         +
-#         6
+
         if self.rect.left <= 0:
-            self.x_change = -1
+            self.x_change = 1
             self.rect.left = 0
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
-            self.x_change = 1
+            self.x_change = -1
         if self.rect.top <= 0:
             self.rect.top = 0
         if self.rect.bottom >= SCREEN_HEIGHT:
@@ -140,9 +160,9 @@ pygame.init()
 
 ########################################
 pygame.display.set_caption("Zoe Town")
-programIcon = pygame.image.load(icon_img)
+#programIcon = pygame.image.load(icon_img)
 background = pygame.transform.scale(pygame.image.load(background_img),(990,660))
-pygame.display.set_icon(programIcon)
+#pygame.display.set_icon(programIcon)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # User Input
@@ -159,14 +179,14 @@ score_rect = pygame.Rect(700,600,140,32)
 
 
 # Initializing my sprites
-player = Player()
+player = Player(player_img)
 gem1 = Gem(random.choice(gems))
 gem2 = Gem(random.choice(gems))
 villain = Villain('monster.png')
 
-#deciding collisions
-def isCollision(playerX,playerY,gemX,gemY):
-    distance = math.sqrt(math.pow(playerX-gemX,2) + math.pow(playerY-gemY,2))
+#determining collisions
+def isCollision(playerX,playerY,objX,objY):
+    distance = math.sqrt(math.pow(playerX-objX,2) + math.pow(playerY-objY,2))
     if distance <45:
         return True
     else:
@@ -232,35 +252,33 @@ while running:
     ################ INPUT BUSINESS ###############################
 
 
-
-
-
     collision1 = isCollision(player.rect.x,player.rect.y,gem1.rect.x,gem1.rect.y)
     collision2 = isCollision(player.rect.x,player.rect.y,gem2.rect.x,gem2.rect.y)
     collision3 = isCollision(player.rect.x,player.rect.y,villain.rect.x,villain.rect.y)
 
     if collision1:
         gem1.collected = True
-        gem1.collision_point = (gem1.rect.x,gem1.rect.y)
+        gem1.last_collision = (gem1.rect.x,gem1.rect.y)
+        gem1.circle.position = gem1.last_collision
         player.score += 1
-#        gem1.draw_circle()
-        pygame.draw.circle(screen, gem1.circle_color,gem1.collision_point, gem1.circle_radius, gem1.circle_px)
 
         
     gem1.check_if_collected()
 
     if collision2:
         gem2.collected = True
-        gem2.collision_point = (gem2.rect.x,gem2.rect.y)
+        gem2.last_collision = (gem2.rect.x,gem2.rect.y)
+        gem2.circle.position = gem2.last_collision
         player.score += 1
-#        gem2.draw_circle()
-        pygame.draw.circle(screen, gem2.circle_color,gem2.collision_point, gem2.circle_radius, gem2.circle_px)
 
 
     gem2.check_if_collected()
 
-    #if collision3:
-    #    running = False
+    if collision3:
+        print("collision!!")
+        player.rect.x = 0
+        player.rect.y = 0
+        player.score -= 50
 
     villain.move_around()
 
@@ -273,3 +291,4 @@ while running:
 
 
     pygame.display.flip()
+    fpsClock.tick(FPS)
