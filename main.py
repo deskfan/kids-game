@@ -8,11 +8,15 @@
 #for background
 #<a href='https://www.freepik.com/vectors/house'>House vector created by pikisuperstar - www.freepik.com</a>
 
+#shake method
+#https://github.com/kidscancode/gamedev/blob/master/tutorials/examples/shake.py
+
 
 import random
 import pygame
 import math
-
+from random import randint
+from itertools import repeat
 
 from pygame.locals import (
     K_UP,
@@ -36,8 +40,6 @@ FPS = 120 # frames per second setting
 fpsClock = pygame.time.Clock()
 
 gems = ['gem.png','gem_orange.png']
-
-user_attempt = ''
 
 
 class Player(pygame.sprite.Sprite):
@@ -69,7 +71,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = SCREEN_HEIGHT
 
 
-class Gem():
+class Gem:
     def __init__(self,image):
         self.surf = pygame.image.load(image)
         self.surf.set_colorkey((0,0,0),pygame.RLEACCEL)
@@ -185,14 +187,33 @@ gem2 = Gem(random.choice(gems))
 villain = Villain('monster.png')
 
 #determining collisions
-def isCollision(playerX,playerY,objX,objY):
+def isCollision(playerX,playerY,objX,objY,threshold=45):
     distance = math.sqrt(math.pow(playerX-objX,2) + math.pow(playerY-objY,2))
-    if distance <45:
+    if distance < threshold:
         return True
     else:
         return False
 
+# 'offset' will be our generator that produces the offset
+# in the beginning, we start with a generator that 
+# yields (0, 0) forever
+offset = repeat((0, 0))
 
+# this function creates our shake-generator
+# it "moves" the screen to the left and right
+# three times by yielding (-5, 0), (-10, 0),
+# ... (-20, 0), (-15, 0) ... (20, 0) three times,
+# then keeps yieling (0, 0)
+def shake():
+    s = -1
+    for _ in range(0, 3):
+        for x in range(0, 20, 5):
+            yield (x*s, 0)
+        for x in range(20, 0, 5):
+            yield (x*s, 0)
+        s *= -1
+    while True:
+        yield (0, 0)
 
 
 # setting up for my while loop
@@ -254,7 +275,7 @@ while running:
 
     collision1 = isCollision(player.rect.x,player.rect.y,gem1.rect.x,gem1.rect.y)
     collision2 = isCollision(player.rect.x,player.rect.y,gem2.rect.x,gem2.rect.y)
-    collision3 = isCollision(player.rect.x,player.rect.y,villain.rect.x,villain.rect.y)
+    collision3 = isCollision(player.rect.x,player.rect.y,villain.rect.x,villain.rect.y,80)
 
     if collision1:
         gem1.collected = True
@@ -276,18 +297,19 @@ while running:
 
     if collision3:
         print("collision!!")
+        offset = shake()
         player.rect.x = 0
         player.rect.y = 0
         player.score -= 50
 
-    villain.move_around()
 
+    villain.move_around()
 
     screen.blit(player.surf,player.rect)
     screen.blit(gem1.surf,gem1.rect)
     screen.blit(gem2.surf,gem2.rect)
-
     screen.blit(villain.surf,villain.rect)
+    screen.blit(screen, next(offset))
 
 
     pygame.display.flip()
