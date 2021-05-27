@@ -11,7 +11,6 @@ import pygame
 import math
 from random import randint
 from itertools import repeat
-
 from pygame.locals import (
     K_UP,
     K_DOWN,
@@ -21,8 +20,9 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
+
 from characters import Player, Villain, Gem,SCREEN_HEIGHT,SCREEN_WIDTH
-from game_functions import isCollision, shake, offset
+from game_functions import display_score, isCollision, shake, offset
 
 
 player_img = 'img/unicorn.png'
@@ -54,9 +54,6 @@ color_passive = pygame.Color('orange')
 color = color_passive
 active = False
 
-# Score
-score_rect = pygame.Rect(700,600,140,32)
-
 
 
 # Initializing my sprites
@@ -67,12 +64,13 @@ villain = Villain(monster_img)
 
 
 
-
 # setting up for my while loop
 running = True
 
 while running:
-    # for loop through the event queue
+
+    ################ HANDLE INPUT EVENTS ###############################
+    # loop through the event queue
     for event in pygame.event.get():
         # Check for KEYDOWN event
         if event.type == KEYDOWN:
@@ -83,36 +81,29 @@ while running:
         if event.type == QUIT:
             running = False
 
+        # did user click on the input rect?
         if event.type == pygame.MOUSEBUTTONDOWN:
             if input_rect.collidepoint(event.pos):
                 active = True
             else:
                 active = False
 
+        # did user delete their input?
         if event.type == pygame.KEYDOWN:
             if active:
                 if event.key == pygame.K_BACKSPACE:
                     user_text = user_text[:-1]
                 else:
-                    user_text += event.unicode
-
-    pressed_keys = pygame.key.get_pressed()
-
-    # Update the player sprite based on user keypresses
-    player.update(pressed_keys)
-
-    screen.fill((0,0,0))
-    screen.blit(background,(0,0))
-
-    ################ SCORE ###############################
-    pygame.draw.rect(screen,pygame.Color('purple'),score_rect,4)
-    score_surface = base_font.render(f'Score is: {player.score}',True,(102,51,153))
-    screen.blit(score_surface,(score_rect.x+5,score_rect.y+5))
-    score_rect.w = max(200,score_surface.get_width()+ 10)
-    ################ SCORE ###############################
+                    user_text += event.unicode    
 
 
-    ################ INPUT BUSINESS ###############################
+
+
+
+
+
+
+    ################ HANDLE INPUTS ###############################
 #    if active:
 #        color = color_active
 #    else:
@@ -122,9 +113,15 @@ while running:
 #    text_surface = base_font.render(f'Score is: {player.score}',True,(102,51,153))
 #    screen.blit(text_surface,(input_rect.x+5,input_rect.y+5))
 #    input_rect.w = max(200,text_surface.get_width()+ 10)
-    ################ INPUT BUSINESS ###############################
 
 
+    ############### HANDLE PLAYER MOVEMENT ###############################
+    pressed_keys = pygame.key.get_pressed()
+    player.update(pressed_keys)
+
+
+
+    ############### HANDLE COLLISIONS ###############################
     collision1 = isCollision(player.rect.x,player.rect.y,gem1.rect.x,gem1.rect.y)
     collision2 = isCollision(player.rect.x,player.rect.y,gem2.rect.x,gem2.rect.y)
     collision3 = isCollision(player.rect.x,player.rect.y,villain.rect.x,villain.rect.y,80)
@@ -154,14 +151,17 @@ while running:
         player.rect.y = 0
         player.score -= 50
 
-
     villain.move_around()
 
-    screen.blit(player.surf,player.rect)
+
+    ############### DRAW SCENE, SPRITES AND LOOT #########################
+    screen.blit(background,(0,0)) #SCENE
+    display_score(player,screen) #SCORE
+    screen.blit(player.surf,player.rect) #PLAYER
     screen.blit(gem1.surf,gem1.rect)
     screen.blit(gem2.surf,gem2.rect)
     screen.blit(villain.surf,villain.rect)
-    screen.blit(screen, next(offset))
+    screen.blit(screen, next(offset)) #CHECK FOR SHAKE
 
 
     pygame.display.flip()
