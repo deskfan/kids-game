@@ -5,6 +5,7 @@
 
 import math
 from itertools import repeat
+import pygame
 
 #determining collisions
 def isCollision(playerX,playerY,objX,objY,threshold=45):
@@ -34,3 +35,14 @@ def shake():
         s *= -1
     while True:
         yield (0, 0)
+
+
+def display_score(player,screen):
+    score_font = pygame.font.Font(None,32)
+    score_rect = pygame.Rect(700,600,140,32)
+    pygame.draw.rect(screen,pygame.Color('purple'),score_rect,4)
+    score_surface = score_font.render(f'Score is: {player.score}',True,(102,51,153))
+    screen.blit(score_surface,(score_rect.x+5,score_rect.y+5))
+    score_rect.w = max(200,score_surface.get_width()+ 10)    
+
+
