@@ -1,15 +1,9 @@
 # for player and program
 #<div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 
-#for gems
-#Images licensed under Creative Commons Attribution 3.0. https://creativecommons.org/licenses/by/3.0/us/
-#gem.png <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 
 #for background
 #<a href='https://www.freepik.com/vectors/house'>House vector created by pikisuperstar - www.freepik.com</a>
-
-#shake method
-#https://github.com/kidscancode/gamedev/blob/master/tutorials/examples/shake.py
 
 
 import random
@@ -27,136 +21,21 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
+from characters import Player, Villain, Gem,SCREEN_HEIGHT,SCREEN_WIDTH
+from game_functions import isCollision, shake, offset
 
 
-player_img = 'unicorn.png'
-background_img = 'background.jpg'
-icon_img = 'ufo.png'
+player_img = 'img/unicorn.png'
+background_img = 'img/background.jpg'
+icon_img = 'img/ufo.png'
+gems = ['img/gem.png','img/gem_orange.png']
+monster_img = 'img/monster.png'
 
 
-SCREEN_WIDTH = 990
-SCREEN_HEIGHT = 660
+
 FPS = 120 # frames per second setting
 fpsClock = pygame.time.Clock()
 
-gems = ['gem.png','gem_orange.png']
-
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self,image):
-        super(Player,self).__init__()
-        self.surf = pygame.image.load(image).convert()
-        self.surf.set_colorkey((255,255,255),pygame.RLEACCEL)
-        self.rect = self.surf.get_rect()
-        self.score = 0
-
-
-    def update(self, pressed_keys):
-        if pressed_keys[K_UP]:
-            self.rect.move_ip(0, -5)
-        if pressed_keys[K_DOWN]:
-            self.rect.move_ip(0, 5)
-        if pressed_keys[K_LEFT]:
-            self.rect.move_ip(-5, 0)
-        if pressed_keys[K_RIGHT]:
-            self.rect.move_ip(5, 0)
-        # Keep player on the screen
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-
-
-class Gem:
-    def __init__(self,image):
-        self.surf = pygame.image.load(image)
-        self.surf.set_colorkey((0,0,0),pygame.RLEACCEL)
-        self.rect = self.surf.get_rect()
-        self.randomize()
-        self.collected = False
-        self.last_collision = ()
-        self.circle = Circle((self.rect.x,self.rect.y))
-
-    def move(self):
-        # Keep player on the screen
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-
-
-    def randomize(self):
-        self.rect.left = random.randint(50,900)
-        self.rect.top = random.randint(50,600)
-
-    def check_if_collected(self):
-        if self.collected:
-            self.rect.y -= 5
-            self.circle.draw_circle()
-        else:
-            self.circle.radius = 30
-            self.circle.px = 30
-
-        if self.rect.y <= -50:#SCREEN_HEIGHT:
-            self.collected = False
-            self.randomize()
-
-
-
-
-class Circle:
-    def __init__(self,position):
-        self.color = (255,255,255)
-        self.position = position
-        self.radius = 30
-        self.px = 30
-        self.start_time = pygame.time.get_ticks()
-
-    def draw_circle(self):
-        if self.radius <= SCREEN_WIDTH/2:
-            self.radius = self.radius + 2
-            if self.px <= 1:
-                self.px = 1
-            else:
-                self.px = self.px - 1
-            pygame.draw.circle(screen, self.color, self.position, self.radius, self.px)
-
-
-class Villain:
-    def __init__(self,image):
-        self.surf = pygame.image.load(image).convert()
-        self.surf.set_colorkey((0,0,0),pygame.RLEACCEL)
-        self.rect = self.surf.get_rect()
-        self.randomize()
-        self.x_change = 1
-        self.y_change = 0
-
-    def move_around(self):
-        self.rect.x = self.rect.x + self.x_change
-
-        if self.rect.left <= 0:
-            self.x_change = 1
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-            self.x_change = -1
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-
-
-    def randomize(self):
-        self.rect.left = random.randint(75,850)
-        self.rect.top = random.randint(75,550)
 
 pygame.init()
 
@@ -182,38 +61,11 @@ score_rect = pygame.Rect(700,600,140,32)
 
 # Initializing my sprites
 player = Player(player_img)
-gem1 = Gem(random.choice(gems))
-gem2 = Gem(random.choice(gems))
-villain = Villain('monster.png')
+gem1 = Gem(random.choice(gems),screen)
+gem2 = Gem(random.choice(gems),screen)
+villain = Villain(monster_img)
 
-#determining collisions
-def isCollision(playerX,playerY,objX,objY,threshold=45):
-    distance = math.sqrt(math.pow(playerX-objX,2) + math.pow(playerY-objY,2))
-    if distance < threshold:
-        return True
-    else:
-        return False
 
-# 'offset' will be our generator that produces the offset
-# in the beginning, we start with a generator that 
-# yields (0, 0) forever
-offset = repeat((0, 0))
-
-# this function creates our shake-generator
-# it "moves" the screen to the left and right
-# three times by yielding (-5, 0), (-10, 0),
-# ... (-20, 0), (-15, 0) ... (20, 0) three times,
-# then keeps yieling (0, 0)
-def shake():
-    s = -1
-    for _ in range(0, 3):
-        for x in range(0, 20, 5):
-            yield (x*s, 0)
-        for x in range(20, 0, 5):
-            yield (x*s, 0)
-        s *= -1
-    while True:
-        yield (0, 0)
 
 
 # setting up for my while loop
