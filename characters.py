@@ -77,11 +77,12 @@ class Gem:
         if self.collected:
             self.rect.y -= 5
             self.circle.draw_circle(self.screen)
+            print("circle!")
         else:
             self.circle.radius = 30
             self.circle.px = 30
 
-        if self.rect.y <= -50:#SCREEN_HEIGHT:
+        if self.rect.y <= -50:#
             self.collected = False
             self.randomize()
 
@@ -119,7 +120,10 @@ class Circle:
         self.position = position
         self.radius = 30
         self.px = 30
-        self.start_time = pygame.time.get_ticks()
+
+    def get_color(self):
+        options = [(253,7,237),(155,7,253),(255,255,255),(7,237,253)]
+        return random.choice(options)
 
     def draw_circle(self,screen):
         if self.radius <= SCREEN_WIDTH/2:
@@ -128,4 +132,9 @@ class Circle:
                 self.px = 1
             else:
                 self.px = self.px - 1
-            pygame.draw.circle(screen, self.color, self.position, self.radius, self.px)
+            print("all the way")
+            print(self.color)
+            print(self.position)
+            print(self.radius)
+            print(self.px)
+            pygame.draw.circle(screen, self.get_color(), self.position, self.radius, self.px)

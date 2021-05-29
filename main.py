@@ -56,7 +56,7 @@ active = False
 
 
 
-# Initializing my sprites
+# Initializing sprites and loot
 player = Player(player_img)
 gem1 = Gem(random.choice(gems),screen)
 gem2 = Gem(random.choice(gems),screen)
@@ -68,7 +68,7 @@ villain = Villain(monster_img)
 running = True
 
 while running:
-
+#    pygame.draw.circle(screen, (0,0,0),(759,375),42, 1)
     ################ HANDLE INPUT EVENTS ###############################
     # loop through the event queue
     for event in pygame.event.get():
@@ -97,6 +97,8 @@ while running:
                     user_text += event.unicode    
 
 
+    screen.blit(background,(0,0)) #SCENE
+    display_score(player,screen) #SCORE
 
 
 
@@ -131,7 +133,6 @@ while running:
         gem1.last_collision = (gem1.rect.x,gem1.rect.y)
         gem1.circle.position = gem1.last_collision
         player.score += 1
-
         
     gem1.check_if_collected()
 
@@ -140,7 +141,6 @@ while running:
         gem2.last_collision = (gem2.rect.x,gem2.rect.y)
         gem2.circle.position = gem2.last_collision
         player.score += 1
-
 
     gem2.check_if_collected()
 
@@ -155,8 +155,6 @@ while running:
 
 
     ############### DRAW SCENE, SPRITES AND LOOT #########################
-    screen.blit(background,(0,0)) #SCENE
-    display_score(player,screen) #SCORE
     screen.blit(player.surf,player.rect) #PLAYER
     screen.blit(gem1.surf,gem1.rect)
     screen.blit(gem2.surf,gem2.rect)
