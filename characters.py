@@ -49,12 +49,17 @@ class Player(pygame.sprite.Sprite):
 class Gem:
     def __init__(self,image,screen):
         self.screen = screen
-        self.surf = pygame.image.load(image)
+        self.image = image
+        self.angle = 0
+        self.display = pygame.image.load(image)
+        self.surf = pygame.transform.rotate(self.display,self.angle)
         self.surf.set_colorkey((0,0,0),pygame.RLEACCEL)
         self.rect = self.surf.get_rect()
         self.randomize()
         self.collected = False
         self.last_collision = ()
+        self.villain_collected = False
+        self.last_villain_collision = ()
         self.circle = Circle((self.rect.x,self.rect.y))
 
     def move(self):
@@ -77,14 +82,25 @@ class Gem:
         if self.collected:
             self.rect.y -= 5
             self.circle.draw_circle(self.screen)
-            print("circle!")
         else:
             self.circle.radius = 30
             self.circle.px = 30
 
-        if self.rect.y <= -50:#
+        if self.rect.y <= -50:
             self.collected = False
             self.randomize()
+
+
+    def check_if_villain_collected(self):
+        if self.collected:
+            self.rect.y += 7
+            self.circle.draw_circle(self.screen,villain=True)
+
+        if self.rect.y >= SCREEN_HEIGHT + 50:
+            self.collected = False
+            self.randomize()
+
+
 
 class Villain:
     def __init__(self,image):
@@ -92,11 +108,12 @@ class Villain:
         self.surf.set_colorkey((0,0,0),pygame.RLEACCEL)
         self.rect = self.surf.get_rect()
         self.randomize()
-        self.x_change = 1
-        self.y_change = 0
+        self.x_change = 3
+        self.y_change = 3
 
     def move_around(self):
         self.rect.x = self.rect.x + self.x_change
+        self.rect.y = self.rect.y + self.y_change
 
         if self.rect.left <= 0:
             self.x_change = 1
@@ -105,9 +122,11 @@ class Villain:
             self.rect.right = SCREEN_WIDTH
             self.x_change = -1
         if self.rect.top <= 0:
+            self.y_change = 1
             self.rect.top = 0
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
+            self.y_change = -1
 
 
     def randomize(self):
@@ -121,20 +140,18 @@ class Circle:
         self.radius = 30
         self.px = 30
 
-    def get_color(self):
-        options = [(253,7,237),(155,7,253),(255,255,255),(7,237,253)]
+    def get_color(self,villain=False):
+        if villain==False:
+            options = [(253,7,237),(155,7,253),(255,255,255),(7,237,253)]
+        else:
+            optiosn = [(0,0,0)]    
         return random.choice(options)
 
-    def draw_circle(self,screen):
+    def draw_circle(self,screen,villain=False):
         if self.radius <= SCREEN_WIDTH/2:
             self.radius = self.radius + 2
             if self.px <= 1:
                 self.px = 1
             else:
                 self.px = self.px - 1
-            print("all the way")
-            print(self.color)
-            print(self.position)
-            print(self.radius)
-            print(self.px)
-            pygame.draw.circle(screen, self.get_color(), self.position, self.radius, self.px)
+            pygame.draw.circle(screen, self.get_color(villain=False), self.position, self.radius, self.px)

@@ -124,11 +124,13 @@ while running:
 
 
     ############### HANDLE COLLISIONS ###############################
-    collision1 = isCollision(player.rect.x,player.rect.y,gem1.rect.x,gem1.rect.y)
-    collision2 = isCollision(player.rect.x,player.rect.y,gem2.rect.x,gem2.rect.y)
-    collision3 = isCollision(player.rect.x,player.rect.y,villain.rect.x,villain.rect.y,80)
+    player_gets_gem1 = isCollision(player.rect.x,player.rect.y,gem1.rect.x,gem1.rect.y)
+    player_gets_gem2 = isCollision(player.rect.x,player.rect.y,gem2.rect.x,gem2.rect.y)
+#    player_hit_villain = isCollision(player.rect.x,player.rect.y,villain.rect.x,villain.rect.y,80)
+    villain_hit_gem1 = isCollision(gem1.rect.x,gem1.rect.y,villain.rect.x,villain.rect.y,100)
+    villain_hit_gem2 = isCollision(gem2.rect.x,gem2.rect.y,villain.rect.x,villain.rect.y,100)
 
-    if collision1:
+    if player_gets_gem1 and gem1.villain_collected == False:
         gem1.collected = True
         gem1.last_collision = (gem1.rect.x,gem1.rect.y)
         gem1.circle.position = gem1.last_collision
@@ -136,7 +138,7 @@ while running:
         
     gem1.check_if_collected()
 
-    if collision2:
+    if player_gets_gem2 and gem2.villain_collected == False:
         gem2.collected = True
         gem2.last_collision = (gem2.rect.x,gem2.rect.y)
         gem2.circle.position = gem2.last_collision
@@ -144,12 +146,28 @@ while running:
 
     gem2.check_if_collected()
 
-    if collision3:
-        print("collision!!")
-        offset = shake()
-        player.rect.x = 0
-        player.rect.y = 0
-        player.score -= 50
+#    if player_hit_villain:
+#        offset = shake()
+#        player.rect.x = 0
+#        player.rect.y = 0
+#        player.score -= 50
+
+    if villain_hit_gem1 and gem1.collected == False:
+        gem1.collected = True
+        gem1.last_collision = (gem1.rect.x,gem1.rect.y)
+        gem1.circle.position = gem1.last_collision
+        player.score -= 1
+    gem1.check_if_villain_collected()
+
+
+    if villain_hit_gem2 and gem2.collected == False:
+        gem2.collected = True
+        gem2.last_collision = (gem2.rect.x,gem2.rect.y)
+        gem2.circle.position = gem2.last_collision
+        player.score -= 1
+    gem2.check_if_villain_collected()
+
+
 
     villain.move_around()
 
