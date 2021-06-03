@@ -4,6 +4,7 @@
 
 import pygame
 import random
+from os import path
 from pygame.locals import (
     K_UP,
     K_DOWN,
@@ -16,6 +17,10 @@ from pygame.locals import (
 
 SCREEN_WIDTH = 990
 SCREEN_HEIGHT = 660
+
+
+
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self,image):
@@ -58,8 +63,6 @@ class Gem:
         self.randomize()
         self.collected = False
         self.last_collision = ()
-        self.villain_collected = False
-        self.last_villain_collision = ()
         self.circle = Circle((self.rect.x,self.rect.y))
 
     def move(self):
@@ -155,3 +158,5 @@ class Circle:
             else:
                 self.px = self.px - 1
             pygame.draw.circle(screen, self.get_color(villain=False), self.position, self.radius, self.px)
+
+

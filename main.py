@@ -63,7 +63,6 @@ gem2 = Gem(random.choice(gems),screen)
 villain = Villain(monster_img)
 
 
-
 # setting up for my while loop
 running = True
 
@@ -130,7 +129,7 @@ while running:
     villain_hit_gem1 = isCollision(gem1.rect.x,gem1.rect.y,villain.rect.x,villain.rect.y,100)
     villain_hit_gem2 = isCollision(gem2.rect.x,gem2.rect.y,villain.rect.x,villain.rect.y,100)
 
-    if player_gets_gem1 and gem1.villain_collected == False:
+    if player_gets_gem1 and gem1.collected == False:
         gem1.collected = True
         gem1.last_collision = (gem1.rect.x,gem1.rect.y)
         gem1.circle.position = gem1.last_collision
@@ -138,7 +137,7 @@ while running:
         
     gem1.check_if_collected()
 
-    if player_gets_gem2 and gem2.villain_collected == False:
+    if player_gets_gem2 and gem2.collected == False:
         gem2.collected = True
         gem2.last_collision = (gem2.rect.x,gem2.rect.y)
         gem2.circle.position = gem2.last_collision
