@@ -7,6 +7,14 @@ import math
 from itertools import repeat
 import pygame
 
+player_img = 'img/unicorn.png'
+background_img = 'img/background.jpg'
+icon_img = 'img/ufo.png'
+gems = ['img/gem.png','img/gem_orange.png']
+monster_img = 'img/monster.png'
+FPS = 120 # frames per second setting
+
+
 #determining collisions
 def isCollision(playerX,playerY,objX,objY,threshold=45):
     distance = math.sqrt(math.pow(playerX-objX,2) + math.pow(playerY-objY,2))
@@ -46,3 +54,10 @@ def display_score(player,screen):
     score_rect.w = max(200,score_surface.get_width()+ 10)    
 
 
+def make_coordinate(value):
+    if value < -0.25:
+        return -1
+    elif value > 0.25:
+        return 1
+    else:
+        return 0

@@ -50,6 +50,21 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
 
+    def update_js(self,axis, joy_buttons):
+        if axis == 'x':
+            for b in joy_buttons:
+                self.rect.move_ip(b,0)
+        else:
+            for b in joy_buttons:
+                self.rect.move_ip(0,b)
+
+
+    def update_js_all(self, joy_buttons):
+        for b in joy_buttons:
+            move = joy_buttons.pop()   
+            self.rect.move_ip(move[0],move[1])
+
+
 
 class Gem:
     def __init__(self,image,screen):
