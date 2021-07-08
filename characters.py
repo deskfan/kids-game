@@ -29,6 +29,7 @@ class Player(pygame.sprite.Sprite):
         self.surf.set_colorkey((255,255,255),pygame.RLEACCEL)
         self.rect = self.surf.get_rect()
         self.score = 0
+        self.speed = 5
 
 
     def update(self, pressed_keys):
