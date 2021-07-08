@@ -64,8 +64,11 @@ villain = Villain(monster_img)
 
 
 # Initializing joystick
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
+try:
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+except:
+    print("no joystick")
 
 
 # setting up game loop
@@ -95,18 +98,20 @@ while running:
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
  
-    axis_x = joystick.get_axis(2)
-    axis_y = joystick.get_axis(3)
+    try:
+        axis_x = joystick.get_axis(2)
+        axis_y = joystick.get_axis(3)
 
-    x_change = make_coordinate(axis_x)
-    y_change = make_coordinate(axis_y)
+        x_change = make_coordinate(axis_x)
+        y_change = make_coordinate(axis_y)
 
-    slow_button = joystick.get_button(4)
-    fast_button = joystick.get_button(5)
+        slow_button = joystick.get_button(4)
+        fast_button = joystick.get_button(5)
+        player.speed = PLAYER_SPEED + fast_button * 10 - slow_button * 2
+        player.rect.move_ip(x_change*player.speed,y_change*player.speed)
 
-    player.speed = PLAYER_SPEED + fast_button * 10 - slow_button * 2
-
-    player.rect.move_ip(x_change*player.speed,y_change*player.speed)
+    except:
+        player.speed = PLAYER_SPEED
 
     ############### HANDLE COLLISIONS ###############################
     player_gets_gem1 = isCollision(player.rect.x,player.rect.y,gem1.rect.x,gem1.rect.y)
