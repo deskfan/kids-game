@@ -38,7 +38,7 @@ fpsClock = pygame.time.Clock()
 background = pygame.transform.scale(pygame.image.load(background_img), (990, 660))
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-pygame.display.set_caption("Zoe Town")
+pygame.display.set_caption("Murphy Town")
 # pygame.display.set_icon(programIcon)
 # loot_sound = pygame.mixer.Sound("crash.wav")
 
